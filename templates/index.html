@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SafeLinks Decoder</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .timestamp {
+            color: blue;
+        }
+        
+        .copy-button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .clear-button {
+            margin-top: 20px;
+            padding: 5px 10px;
+            background-color: #FF0000;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function copyUrl(url) {
+            var tempInput = document.createElement("input");
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            alert("URL copied to clipboard!");
+        }
+        
+        function copyDomain(url) {
+            var tempInput = document.createElement("input");
+            var parser = document.createElement('a');
+            parser.href = url;
+            tempInput.value = parser.hostname;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            alert("Domain copied to clipboard!");
+        }
+        
+        function clearHistory() {
+            if (confirm("Are you sure you want to clear the session history?")) {
+                window.location.href = "/";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>SafeLinks Decoder</h1>
+    <form method="POST" action="/">
+        <label for="safelinks_link">SafeLinks Encoded Link:</label><br>
+        <input type="text" id="safelinks_link" name="safelinks_link" required><br><br>
+        <input type="submit" value="Decode">
+    </form>
+    {% if session_history %}
+        <h2>Session History:</h2>
+        <ul>
+            {% for item in session_history[::-1][:5] %}
+                <li>
+                    <span class="url">{{ item[1] }}</span> - <span class="timestamp">{{ item[0] }}</span>
+                    <button class="copy-button" onclick="copyUrl('{{ item[1] }}')">Copy URL</button>
+                    <button class="copy-button" onclick="copyDomain('{{ item[1] }}')">Copy Domain</button>
+                </li>
+                <br>
+            {% endfor %}
+        </ul>
+        <button class="clear-button" type="submit" form="clear-form">Clear History</button>
+
+        <form id="clear-form" action="/clear_history" method="POST" style="display: none;"></form>
+
+    {% endif %}
+    {% if message %}
+        <h2>{{ message }}</h2>
+        {% if original_link %}
+            <p>Original Link: {{ original_link }}</p>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
+
